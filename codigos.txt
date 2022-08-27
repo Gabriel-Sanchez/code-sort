@@ -1,0 +1,134 @@
+PROCEDURE Mezcla(VAR a,b:vector;prim,ult:CARDINAL); 
+(* utiliza el vector b como auxiliar para realizar la mezcla *) 
+ VAR mitad:CARDINAL; 
+BEGIN 
+ IF prim<ult THEN 
+ mitad:=(prim+ult)DIV 2; 
+ Mezcla(a,b,prim,mitad); 
+ Mezcla(a,b,mitad+1,ult); 
+ Combinar(a,b,prim,mitad,mitad+1,ult) 
+ END 
+END Mezcla;
+
+PROCEDURE Combinar(VAR a,b:vector;p1,u1,p2,u2:CARDINAL); 
+(* mezcla ordenadamente los subvectores a[p1..u1] y a[p2..u2] 
+suponiendo que estos estan ya ordenados y que son consecutivos 
+(p2=u1+1), utilizando el vector auxiliar b *) 
+ VAR i1,i2,k:CARDINAL; 
+BEGIN 
+ IF (p1>u1) OR (p2>u2) THEN RETURN END; 
+ FOR k:=p1 TO u2 DO b[k]:=a[k] END; (* volcamos a en b *) 
+ i1:=p1;i2:=p2; (* cada indice se encarga de un subvector *) 
+ FOR k:=p1 TO u2 DO 
+ IF b[i1]<=b[i2] THEN 
+ a[k]:=b[i1]; 
+ IF i1<u1 THEN INC(i1) ELSE b[i1]:=MAX(INTEGER) END 
+ ELSE 
+ a[k]:=b[i2]; 
+ IF i2<u2 THEN INC(i2) ELSE b[i2]:=MAX(INTEGER) END 
+ END 
+ END 
+END Combinar;
+
+
+--------------------------------
+
+2
+
+
+
+PROCEDURE Monticulos(VAR a:vector;prim,ult:CARDINAL); 
+ VAR i:CARDINAL; 
+BEGIN 
+ HacerMonticulo(a,prim,ult); 
+ FOR i:=ult TO prim+1 BY -1 DO 
+ Intercambia(a,prim,i); 
+ Empujar(a,prim,i-1,prim) 
+ END 
+END Monticulos;
+
+PROCEDURE HacerMonticulo(VAR a:vector;prim,ult:CARDINAL); 
+(* construye un monticulo a partir de a[prim..ult] *) 
+ VAR i:CARDINAL; 
+BEGIN 
+ FOR i:=(ult-prim+1)DIV 2 TO 1 BY -1 DO 
+ Empujar(a,prim,ult,prim+i-1) 
+ END 
+END HacerMonticulo; 
+PROCEDURE Empujar(VAR a:vector;prim,ult,i:CARDINAL); 
+(* empuja el elemento en posicion i hasta su posicion final *) 
+ VAR j,k:CARDINAL; 
+BEGIN 
+ k:=i-prim+1; 
+ REPEAT 
+ j:=k; 
+ IF (2*j<=ult-prim+1) AND (a[2*j+prim-1]>a[k+prim-1]) THEN 
+ k:=2*j 
+ END; 
+ IF (2*j<ult-prim+1) AND (a[2*j+prim]>a[k+prim-1]) THEN 
+ k:=2*j+1 
+ END; 
+ Intercambia(a,j+prim-1,k+prim-1); 
+ UNTIL j=k 
+END Empujar; 
+
+
+-----------------------------------------
+3
+
+
+PROCEDURE Quicksort(VAR a:vector;prim,ult:CARDINAL); 
+ VAR l:CARDINAL; 
+BEGIN 
+ IF prim<ult THEN 
+ l:=Pivote(a,a[prim],prim,ult); 
+ Quicksort(a,prim,l-1); 
+ Quicksort(a,l+1,ult) 
+ END 
+END Quicksort; 
+
+PROCEDURE Pivote(VAR a:vector;p:INTEGER;prim,ult:CARDINAL) 
+ :CARDINAL; 
+(* permuta los elementos de a[prim..ult] y devuelve una 
+posicion l tal que prim<=l<=ult, a[i]<=p si prim<=i<l, 
+a[l]=p, y a[i]>p si l<i<=ult, donde p es el valor inicial 
+de a[prim] *) 
+ VAR i,l:CARDINAL; 
+BEGIN 
+ i:=prim; l:=ult+1; 
+ REPEAT INC(i) UNTIL (a[i]>p) OR (i>=ult); 
+ REPEAT DEC(l) UNTIL (a[l]<=p); 
+ WHILE i<l DO 
+ Intercambia(a,i,l); 
+ REPEAT INC(i) UNTIL (a[i]>p); 
+ REPEAT DEC(l) UNTIL (a[l]<=p) 
+ END; 
+ Intercambia(a,prim,l); 
+ RETURN l 
+END Pivote;
+
+
+----------------------------------
+4
+
+PROCEDURE Incrementos(VAR a:vector;prim,ult:CARDINAL); 
+ VAR i,j,h,N:CARDINAL; v:INTEGER; 
+BEGIN 
+ N:=(ult-prim+1); (* numero de elementos *) 
+ h:=1; 
+
+ REPEAT h:=3*h+1 UNTIL h>N; (* construimos la secuencia *) 
+ REPEAT 
+ h:=h DIV 3; 
+ FOR i:=h+1 TO N DO 
+ v:=a[i]; j:=i; 
+ WHILE (j>h) AND (a[j-h+prim-1]>v) DO 
+ a[j+prim-1]:=a[j-h+prim-1]; 
+ DEC(j,h) 
+ END; 
+ a[j+prim-1]:=v; 
+ END 
+ UNTIL h=1 
+END Incrementos;
+
+
